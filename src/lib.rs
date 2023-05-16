@@ -24,7 +24,7 @@
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar");
 //! os_path.push("/baz.txt");
-//! //assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+//! assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
 //! ```
 //!
 //! //! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
