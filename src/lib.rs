@@ -131,8 +131,47 @@ impl OsPath {
         Self::default()
     }
 
+    /// Creates a new OsPath from the existing one, and joins the path to it.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/foo/bar/");
+    /// let new_os_path = os_path.join("/baz.txt");
+    /// assert_eq!(new_os_path.to_string(),"/foo/bar/baz.txt");
+    /// ```
+    pub fn join<P: AsRef<Path>>(&self, path: P) -> Self {
+        let mut new_self = self.clone();
+        let path = Self::build_self(path);
+        Self::merge_paths(&mut new_self, path);
+        new_self.path = Self::build_pathbuf(&new_self.components, new_self.absolute);
+        new_self
+    }
+
+    /// Mutates self by appending the supplied path to it.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let mut os_path = OsPath::from("/foo/bar/");
+    /// os_path.push("/baz.txt");
+    /// assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+    /// ```
+    pub fn push<P: AsRef<Path>>(&mut self, path: P) {
+        let path = Self::build_self(path);
+        Self::merge_paths(self, path);
+        self.path = Self::build_pathbuf(&self.components, self.absolute);
+    }
+
     /// Traverses the components of the path and and resolves any `..` components.
     /// This cannot be done automatically because ".." may be desireable in some cases.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let mut os_path = OsPath::from("/foo/bar/baz/../pow.txt");
+    /// assert_eq!(os_path.to_string(),"/foo/bar/baz/../pow.txt");
+    ///
+    /// os_path.resolve();
+    /// assert_eq!(os_path.to_string(),"/foo/bar/pow.txt");
+    /// ```
     pub fn resolve(&mut self) {
         let mut new_vec: Vec<String> = Vec::new();
         for c in &self.components {
@@ -143,20 +182,6 @@ impl OsPath {
             }
         }
         self.components = new_vec;
-        self.path = Self::build_pathbuf(&self.components, self.absolute);
-    }
-
-    pub fn join<P: AsRef<Path>>(&self, path: P) -> Self {
-        let mut new_self = self.clone();
-        let path = Self::build_self(path);
-        Self::merge_paths(&mut new_self, path);
-        new_self.path = Self::build_pathbuf(&new_self.components, new_self.absolute);
-        new_self
-    }
-
-    pub fn push<P: AsRef<Path>>(&mut self, path: P) {
-        let path = Self::build_self(path);
-        Self::merge_paths(self, path);
         self.path = Self::build_pathbuf(&self.components, self.absolute);
     }
 }
