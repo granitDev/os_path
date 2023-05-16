@@ -138,7 +138,7 @@ fn test_parent() {
     #[cfg(unix)]
     {
         let path = OsPath::from("/foo/bar/baz.txt");
-        assert_eq!(path.parent(), Some(OsPath::from("/foo/bar")));
+        assert_eq!(path.parent(), Some(OsPath::from("/foo/bar/")));
 
         let path = OsPath::from("/foo/bar/");
         assert_eq!(path.parent(), Some(OsPath::from("/foo/")));
@@ -147,7 +147,7 @@ fn test_parent() {
     #[cfg(windows)]
     {
         let path = OsPath::from("C:\\foo\\bar\\baz.txt");
-        assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\bar")));
+        assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\bar\\")));
 
         let path = OsPath::from("C:\\foo\\bar\\");
         assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\")));

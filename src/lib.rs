@@ -117,7 +117,6 @@ const FS: char = '/';
 const UP: &str = "..";
 
 /// An intelligent path type that can be used in place of `std::path::PathBuf`.
-
 #[derive(Clone, PartialEq, Debug, Default, Deserialize, Serialize)]
 pub struct OsPath {
     components: Vec<String>,
@@ -187,22 +186,60 @@ impl OsPath {
 }
 
 impl OsPath {
+    /// Returns true if the path is absolute.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/absolute/path/");
+    /// assert!(os_path.absolute());
+    ///
+    /// let os_path = OsPath::from("not/absolute/path/");
+    /// assert!(!os_path.absolute());
+    /// ```
     pub fn absolute(&self) -> bool {
         self.absolute
     }
 
+    /// Returns true if the path exists.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("src/lib.rs");
+    /// assert!(os_path.exists());
+    /// ```
     pub fn exists(&self) -> bool {
         self.path.exists()
     }
 
+    /// Returns true if the last item is a file.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("src/lib.rs");
+    /// assert!(os_path.is_file());
+    /// ```
     pub fn is_file(&self) -> bool {
         !self.directory
     }
 
+    /// Returns true if the last item is a directory.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("src/");
+    /// assert!(os_path.is_dir());
+    /// ```
     pub fn is_dir(&self) -> bool {
         self.directory
     }
 
+    /// Returns the last item as a String.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("src/lib.rs");
+    /// assert_eq!(os_path.name().unwrap().to_string(), "lib.rs");
+    /// ```
     pub fn name(&self) -> Option<&String> {
         if self.components.len() > 0 {
             return self.components.last();
@@ -210,10 +247,27 @@ impl OsPath {
         None
     }
 
+    /// Returns the extension of the file if it has one.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("src/lib.rs");
+    /// assert_eq!(os_path.name().unwrap().to_string(), "lib.rs");
+    /// ```
     pub fn extension(&self) -> Option<String> {
-        Some(self.name()?.split('.').last()?.to_string())
+        if self.is_file() {
+            return Some(self.name()?.split('.').last()?.to_string());
+        }
+        None
     }
 
+    /// Returns the extension of the file if it has one.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("foo/bar/baz/pow.txt");
+    /// assert_eq!(os_path.parent().unwrap().to_string(), "foo/bar/baz/");
+    /// ```
     pub fn parent(&self) -> Option<Self> {
         if self.components.len() < 2 {
             return None;
@@ -222,16 +276,20 @@ impl OsPath {
         let mut new_self = self.clone();
         new_self.components.truncate(i);
         new_self.path = Self::build_pathbuf(&new_self.components, new_self.absolute);
+        new_self.directory = true;
         Some(new_self)
     }
 }
 
 impl OsPath {
     pub fn to_string(&self) -> String {
-        match self.absolute {
-            true => ROOT.to_string() + &self.components.join(SLASH_STR),
-            false => self.components.join(SLASH_STR),
+        match (self.absolute, self.directory) {
+            (true, true) => ROOT.to_string() + &self.components.join(SLASH_STR) + SLASH_STR,
+            (true, false) => ROOT.to_string() + &self.components.join(SLASH_STR),
+            (false, false) => self.components.join(SLASH_STR),
+            (false, true) => self.components.join(SLASH_STR) + SLASH_STR,
         }
+
     }
 
     pub fn to_pathbuf(&self) -> PathBuf {
