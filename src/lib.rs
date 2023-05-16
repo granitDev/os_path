@@ -1,3 +1,82 @@
+//! Cross-platform intelligent path creation, resolution, and manipulation.
+//!
+//! # Path Normalization
+//!
+//! Path slashes are normalized to your platform's native path format at creation and modification. This resolves
+//! PathBuf's issue of returning to you the exact string you passed to it, even if it's incorrect for the current
+//! platform.
+//!
+//! # False Root Handling
+//!
+//! ```rust
+//! // Standard Library
+//! let mut path_buf = PathBuf::new();
+//! path.push("/foo/bar");
+//! path.push("/baz.txt");
+//! assert_eq!(path.to_string_lossy(),"/baz.txt");
+//!
+//! // OsPath
+//! let mut os_path = OsPath::new();
+//! os_path.push("/foo/bar");
+//! os_path.push("/baz.txt");
+//! assert_eq!(path.to_string(),"/foo/bar/baz.txt");
+//! ```
+//!
+//! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
+//! `/foo/bar` and we push() /baz.txt to it. With the standard libraries Path and PathBuf, you'll end up with `/baz.txt`
+//! as your path. This is very counter intuitive, and requires extra code be written to strip the leading slash in order
+//! to prevent this.
+//!
+//! Instead, OsPath will do what you expect, and return /foo/bar/baz.txt.
+//!
+//! And OsPath does this while still assuming at the start that both paths were absolute. If you queried either path
+//! beforehand, they would both return true for `is_absolute()`. However, when you joined the two paths, OsPath correctly
+//! assumes the second path is relative to the first, and joins them correctly.
+//!
+//! > Note that this is not a problem on Windows, as attempting to join any path starting with `C:\` is nonsensical,
+//! > while joinging a path prefixed with `/` or `\\` is not.
+//!
+//! # Path Resolution and Traversal
+//!
+//! If you `join()` or `push()` a path that starts with `..`, OsPath will traverse the path, and build the correct path.
+//!
+//! ```rust
+//! // Standard Library
+//! let mut path_buf = PathBuf::new();
+//! path.push("/foo/bar");
+//! path.push("../baz.txt");
+//! assert_eq!(path.to_string_lossy(),"/foo/bar/../baz.txt");
+//!
+//! // OsPath
+//! let mut os_path = OsPath::new();
+//! os_path.push("/foo/bar");
+//! os_path.push("../baz.txt");
+//! assert_eq!(path.to_string(),"/foo/baz.txt");
+//! ```
+//!
+//! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
+//!
+//! ```rust
+//! let mut os_path = OsPath::new();
+//! os_path.push("/foo/bar/baz/");
+//! os_path.push("../../pow.txt");
+//! assert_eq!(path.to_string(),"/foo/pow.txt");
+//! ```
+//!
+//! And, if your path ends in a file, and you `join()` or `push()` a path that starts with `..`, OsPath will traverse the
+//! path, and build the correct path, skipping over the file.
+//!
+//! ```rust
+//! let mut os_path = OsPath::new();
+//! os_path.push("/foo/bar/baz.txt");
+//! os_path.push("../pow.txt");
+//! assert_eq!(path.to_string(),"/foo/pow.txt");
+//! ```
+//!
+//! # File And Directory Handling
+//!
+//! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
+
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -22,6 +101,8 @@ const RC: char = char::REPLACEMENT_CHARACTER; // '�'
 const BS: char = '\\';
 const FS: char = '/';
 const UP: &str = "..";
+
+/// An intelligent path type that can be used in place of `std::path::PathBuf`.
 
 #[derive(Clone, PartialEq, Debug, Default, Deserialize, Serialize)]
 pub struct OsPath {
