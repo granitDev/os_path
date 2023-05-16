@@ -1,10 +1,10 @@
-use pathz::PathZ;
+use os_path::OsPath;
 
 #[test]
 fn test_impossible_path() {
     assert_eq!(
-        PathZ::from("/\\///\\foo///bar\\\\baz.txt"),
-        PathZ::from("/foo/bar/baz.txt")
+        OsPath::from("/\\///\\foo///bar\\\\baz.txt"),
+        OsPath::from("/foo/bar/baz.txt")
     )
 }
 
@@ -12,18 +12,18 @@ fn test_impossible_path() {
 fn test_absolute_path_resolution() {
     #[cfg(unix)]
     {
-        assert!(PathZ::from("/foo").absolute());
-        assert!(PathZ::from("/foo/").absolute());
-        assert!(!PathZ::from("foo/").absolute());
-        assert!(!PathZ::from("foo/bar/").absolute());
+        assert!(OsPath::from("/foo").absolute());
+        assert!(OsPath::from("/foo/").absolute());
+        assert!(!OsPath::from("foo/").absolute());
+        assert!(!OsPath::from("foo/bar/").absolute());
     }
     #[cfg(windows)]
     {
-        assert!(PathZ::from("C:\\foo").absolute());
-        assert!(PathZ::from("C:\\foo\\").absolute());
-        assert!(!PathZ::from("foo\\").absolute());
-        assert!(!PathZ::from("foo\\bar\\").absolute());
-        assert!(!PathZ::from("\\foo\\bar\\").absolute());
+        assert!(OsPath::from("C:\\foo").absolute());
+        assert!(OsPath::from("C:\\foo\\").absolute());
+        assert!(!OsPath::from("foo\\").absolute());
+        assert!(!OsPath::from("foo\\bar\\").absolute());
+        assert!(!OsPath::from("\\foo\\bar\\").absolute());
     }
 }
 
@@ -31,15 +31,15 @@ fn test_absolute_path_resolution() {
 fn test_directory_resolution() {
     #[cfg(unix)]
     {
-        assert!(PathZ::from("/foo/").is_dir());
-        assert!(PathZ::from("/foo").is_file());
-        assert!(PathZ::from("/foo/bar.txt").is_file());
+        assert!(OsPath::from("/foo/").is_dir());
+        assert!(OsPath::from("/foo").is_file());
+        assert!(OsPath::from("/foo/bar.txt").is_file());
     }
     #[cfg(windows)]
     {
-        assert!(PathZ::from("C:\\foo\\").is_dir());
-        assert!(PathZ::from("C:\\foo").is_file);
-        assert!(PathZ::from("C:\\foo\\bar.txt").is_file);
+        assert!(OsPath::from("C:\\foo\\").is_dir());
+        assert!(OsPath::from("C:\\foo").is_file);
+        assert!(OsPath::from("C:\\foo\\bar.txt").is_file);
     }
 }
 
@@ -47,10 +47,10 @@ fn test_directory_resolution() {
 fn test_traversal_resolution() {
     #[cfg(unix)]
     {
-        let mut path = PathZ::from("/foo/bar/baz/../../zip.txt");
+        let mut path = OsPath::from("/foo/bar/baz/../../zip.txt");
         path.resolve();
 
-        assert_eq!(path, PathZ::from("/foo/zip.txt"));
+        assert_eq!(path, OsPath::from("/foo/zip.txt"));
     }
 }
 
@@ -59,36 +59,36 @@ fn test_directory_traversal() {
     #[cfg(unix)]
     {
         assert_eq!(
-            PathZ::from("/foo1/foo2/foo3/bar.txt").join("../baz/zip.txt"),
-            PathZ::from("/foo1/foo2/baz/zip.txt")
+            OsPath::from("/foo1/foo2/foo3/bar.txt").join("../baz/zip.txt"),
+            OsPath::from("/foo1/foo2/baz/zip.txt")
         );
 
         assert_eq!(
-            PathZ::from("/foo1/foo2/foo3/bar.txt").join("../../baz/zip.txt"),
-            PathZ::from("/foo1/baz/zip.txt")
+            OsPath::from("/foo1/foo2/foo3/bar.txt").join("../../baz/zip.txt"),
+            OsPath::from("/foo1/baz/zip.txt")
         );
 
         assert_eq!(
-            PathZ::from("/foo1/foo2/foo3/").join("../zip.txt"),
-            PathZ::from("/foo1/foo2/zip.txt")
+            OsPath::from("/foo1/foo2/foo3/").join("../zip.txt"),
+            OsPath::from("/foo1/foo2/zip.txt")
         );
     }
 
     #[cfg(windows)]
     {
         assert_eq!(
-            PathZ::from("C:\\foo1\\foo2\\foo3\\bar.txt").join("..\\..\\baz\\zip.txt"),
-            PathZ::from("C:\\foo1\\baz\\zip.txt")
+            OsPath::from("C:\\foo1\\foo2\\foo3\\bar.txt").join("..\\..\\baz\\zip.txt"),
+            OsPath::from("C:\\foo1\\baz\\zip.txt")
         );
 
         assert_eq!(
-            PathZ::from("C:\\foo1\\foo2\\foo3\\bar.txt").join("..\\..\\..\\baz\\zip.txt"),
-            PathZ::from("C:\\baz\\zip.txt")
+            OsPath::from("C:\\foo1\\foo2\\foo3\\bar.txt").join("..\\..\\..\\baz\\zip.txt"),
+            OsPath::from("C:\\baz\\zip.txt")
         );
 
         assert_eq!(
-            PathZ::from("C:\\foo1\\foo2\\foo3\\").join("..\\zip.txt"),
-            PathZ::from("C:\\foo1\\foo2\\zip.txt")
+            OsPath::from("C:\\foo1\\foo2\\foo3\\").join("..\\zip.txt"),
+            OsPath::from("C:\\foo1\\foo2\\zip.txt")
         );
     }
 }
@@ -98,16 +98,16 @@ fn test_false_root_protection() {
     #[cfg(unix)]
     {
         assert_eq!(
-            PathZ::from("/test/path/").join("/more/path/foo.txt"),
-            PathZ::from("/test/path/more/path/foo.txt")
+            OsPath::from("/test/path/").join("/more/path/foo.txt"),
+            OsPath::from("/test/path/more/path/foo.txt")
         );
     }
 
     #[cfg(windows)]
     {
         assert_eq!(
-            PathZ::from("C:\\test\\path\\").join("\\more\\path\\foo.txt"),
-            PathZ::from("C:\\test\\path\\more\\path\\foo.txt")
+            OsPath::from("C:\\test\\path\\").join("\\more\\path\\foo.txt"),
+            OsPath::from("C:\\test\\path\\more\\path\\foo.txt")
         );
     }
 }
@@ -116,19 +116,19 @@ fn test_false_root_protection() {
 fn test_name() {
     #[cfg(unix)]
     {
-        let path = PathZ::from("/foo/bar/baz.txt");
+        let path = OsPath::from("/foo/bar/baz.txt");
         assert_eq!(path.name(), Some(&"baz.txt".to_string()));
 
-        let path = PathZ::from("/foo/bar/");
+        let path = OsPath::from("/foo/bar/");
         assert_eq!(path.name(), Some(&"bar".to_string()))
     }
 
     #[cfg(windows)]
     {
-        let path = PathZ::from("C:\\foo\\bar\\baz.txt");
+        let path = OsPath::from("C:\\foo\\bar\\baz.txt");
         assert_eq!(path.name(), Some(&"baz.txt".to_string()));
 
-        let path = PathZ::from("C:\\foo\\bar\\");
+        let path = OsPath::from("C:\\foo\\bar\\");
         assert_eq!(path.name(), Some(&"bar".to_string()))
     }
 }
@@ -137,19 +137,19 @@ fn test_name() {
 fn test_parent() {
     #[cfg(unix)]
     {
-        let path = PathZ::from("/foo/bar/baz.txt");
-        assert_eq!(path.parent(), Some(PathZ::from("/foo/bar")));
+        let path = OsPath::from("/foo/bar/baz.txt");
+        assert_eq!(path.parent(), Some(OsPath::from("/foo/bar")));
 
-        let path = PathZ::from("/foo/bar/");
-        assert_eq!(path.parent(), Some(PathZ::from("/foo/")));
+        let path = OsPath::from("/foo/bar/");
+        assert_eq!(path.parent(), Some(OsPath::from("/foo/")));
     }
 
     #[cfg(windows)]
     {
-        let path = PathZ::from("C:\\foo\\bar\\baz.txt");
-        assert_eq!(path.parent(), Some(PathZ::from("C:\\foo\\bar")));
+        let path = OsPath::from("C:\\foo\\bar\\baz.txt");
+        assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\bar")));
 
-        let path = PathZ::from("C:\\foo\\bar\\");
-        assert_eq!(path.parent(), Some(PathZ::from("C:\\foo\\")));
+        let path = OsPath::from("C:\\foo\\bar\\");
+        assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\")));
     }
 }
