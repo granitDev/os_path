@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use serde::{Deserialize, Serialize};
 
 #[cfg(unix)]
 mod localization {
@@ -22,7 +23,7 @@ const BS: char = '\\';
 const FS: char = '/';
 const UP: &str = "..";
 
-#[derive(Clone, PartialEq, Debug, Default)]
+#[derive(Clone, PartialEq, Debug, Default, Deserialize, Serialize)]
 pub struct OsPath {
     components: Vec<String>,
     absolute: bool,
