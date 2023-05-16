@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use serde::{Deserialize, Serialize};
 
 #[cfg(unix)]
 mod localization {
@@ -88,6 +88,10 @@ impl OsPath {
             return self.components.last();
         }
         None
+    }
+
+    pub fn extension(&self) -> Option<String> {
+        Some(self.name()?.split('.').last()?.to_string())
     }
 
     pub fn parent(&self) -> Option<Self> {

@@ -1,6 +1,6 @@
 [package]
 name = "os_path"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Intelligent path handling with std lib interoperability"
 documentation = "https://docs.rs/os_path"
