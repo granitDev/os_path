@@ -8,21 +8,26 @@
 //!
 //! # False Root Handling
 //!
+//!
 //! ```rust
 //! // Standard Library
+//! use std::path::PathBuf;
+//!
 //! let mut path_buf = PathBuf::new();
-//! path.push("/foo/bar");
-//! path.push("/baz.txt");
-//! assert_eq!(path.to_string_lossy(),"/baz.txt");
+//! path_buf.push("/foo/bar");
+//! path_buf.push("/baz/pow.txt");
+//! assert_eq!(path_buf.to_string_lossy(),"/baz/pow.txt");
 //!
 //! // OsPath
+//! use os_path::OsPath;
+//!
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar");
 //! os_path.push("/baz.txt");
-//! assert_eq!(path.to_string(),"/foo/bar/baz.txt");
+//! //assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
 //! ```
 //!
-//! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
+//! //! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
 //! `/foo/bar` and we push() /baz.txt to it. With the standard libraries Path and PathBuf, you'll end up with `/baz.txt`
 //! as your path. This is very counter intuitive, and requires extra code be written to strip the leading slash in order
 //! to prevent this.
@@ -36,46 +41,55 @@
 //! > Note that this is not a problem on Windows, as attempting to join any path starting with `C:\` is nonsensical,
 //! > while joinging a path prefixed with `/` or `\\` is not.
 //!
-//! # Path Resolution and Traversal
+//! //! # Path Resolution and Traversal
 //!
 //! If you `join()` or `push()` a path that starts with `..`, OsPath will traverse the path, and build the correct path.
 //!
 //! ```rust
 //! // Standard Library
+//! use std::path::PathBuf;
+//!
 //! let mut path_buf = PathBuf::new();
-//! path.push("/foo/bar");
-//! path.push("../baz.txt");
-//! assert_eq!(path.to_string_lossy(),"/foo/bar/../baz.txt");
+//! path_buf.push("/foo/bar");
+//! path_buf.push("../baz.txt");
+//! assert_eq!(path_buf.to_string_lossy(),"/foo/bar/../baz.txt");
 //!
 //! // OsPath
+//! use os_path::OsPath;
+//!
 //! let mut os_path = OsPath::new();
-//! os_path.push("/foo/bar");
+//! os_path.push("/foo/bar/");
 //! os_path.push("../baz.txt");
-//! assert_eq!(path.to_string(),"/foo/baz.txt");
+//! assert_eq!(os_path.to_string(),"/foo/baz.txt");
 //! ```
 //!
-//! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
+//! //! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
 //!
 //! ```rust
+//! use os_path::OsPath;
+//!
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar/baz/");
 //! os_path.push("../../pow.txt");
-//! assert_eq!(path.to_string(),"/foo/pow.txt");
+//! assert_eq!(os_path.to_string(),"/foo/pow.txt");
 //! ```
 //!
 //! And, if your path ends in a file, and you `join()` or `push()` a path that starts with `..`, OsPath will traverse the
 //! path, and build the correct path, skipping over the file.
 //!
 //! ```rust
+//! use os_path::OsPath;
+//!
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar/baz.txt");
 //! os_path.push("../pow.txt");
-//! assert_eq!(path.to_string(),"/foo/pow.txt");
+//! assert_eq!(os_path.to_string(),"/foo/pow.txt");
 //! ```
 //!
 //! # File And Directory Handling
 //!
 //! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
+//!
 
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
@@ -250,6 +264,10 @@ impl OsPath {
 
     fn merge_paths(first: &mut Self, mut second: Self) {
         if second.components.len() == 0 {
+            return;
+        }
+        if first.components.len() == 0 {
+            *first = second;
             return;
         }
         if !first.directory && second.components.first().unwrap() == UP {
