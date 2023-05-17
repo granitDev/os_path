@@ -26,6 +26,8 @@ OsPath can handle multiple `..` in a row, and will traverse the path correctly. 
 
 And, if your path ends in a file, and you `join()` or `push()` a path that starts with `..`, OsPath will traverse the path, and build the correct path. `/foo/bar/baz.txt` joined with `../pow.txt` will return `/foo/pow.txt`.
 
+> Note: Path traversal is not automatic when using the `OsPath::from()` method, because it can be advantageous to retain the `..` in the path. For example, if you are passing this path to an outside program, you may want to retain the `..` so that the program can handle the path traversal itself. However, it can be invoked with `os_path.resolve()`.
+
 #### File And Directory Handling
 If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
 
@@ -38,4 +40,8 @@ It can be passed into any function that takes <P: AsRef<Path>>(path: P) as an ar
 MIT License
 
 ## Project status
-This is in beta testing, and is not ready for production use.
+Decently stable, but still in development. Documentation is still in the works, I'm adding to it regularly right now.
+
+It's unlikely that the API will break, as I'm adding items to it, not removing or renaming as the existing API matches very closely with std::path::Path/PathBuf.
+
+There are a decent amount of unit tests applied, but I'm sure there are still some unhandled edge cases - that said, my goal was to make a friendlier and more powerful version of PathBuf, thus, any as-of-yet unhandled edge cases are likely to behave similarly to PathBuf.
