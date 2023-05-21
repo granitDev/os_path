@@ -5,6 +5,20 @@
 //! Path slashes are normalized to your platform's native path format at creation and modification. This resolves
 //! PathBuf's issue of returning to you the exact string you passed to it, even if it's incorrect for the current
 //! platform.
+//! ```rust
+//! // Standard Library
+//! use std::path::PathBuf;
+//!
+//! let mut path_buf = PathBuf::from("\\foo\\bar\\baz.txt");
+//! assert_eq!(path_buf.to_string_lossy(),"\\foo\\bar\\baz.txt");
+//!
+//! // OsPath
+//! use os_path::OsPath;
+//!
+//! let mut os_path = OsPath::from("\\foo\\bar\\baz.txt");
+//! assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+//! ```
+//!
 //!
 //! # False Root Handling
 //!
@@ -269,7 +283,7 @@ impl OsPath {
     /// assert_eq!(os_path.parent().unwrap().to_string(), "foo/bar/baz/");
     /// ```
     pub fn parent(&self) -> Option<Self> {
-        if self.components.len() < 2 {
+        if self.components.len() < 2 && !self.absolute {
             return None;
         }
         let i = self.components.len() - 1;
@@ -289,7 +303,6 @@ impl OsPath {
             (false, false) => self.components.join(SLASH_STR),
             (false, true) => self.components.join(SLASH_STR) + SLASH_STR,
         }
-
     }
 
     pub fn to_pathbuf(&self) -> PathBuf {
@@ -305,7 +318,7 @@ impl OsPath {
 impl OsPath {
     fn build_self<P: AsRef<Path>>(path: P) -> Self {
         let path = path.as_ref().to_string_lossy().to_string();
-        let absolute = path.starts_with(ROOT);
+        let absolute = path.starts_with(ROOT) || path.starts_with(BS) || path.starts_with(FS);
         let directory = if path.ends_with(SLASH) || path.ends_with(UP) {
             true
         } else {

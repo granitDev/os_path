@@ -153,3 +153,24 @@ fn test_parent() {
         assert_eq!(path.parent(), Some(OsPath::from("C:\\foo\\")));
     }
 }
+
+#[test]
+fn test_some_edge_cases() {
+    #[cfg(unix)]
+    {
+        assert!(OsPath::from("/").is_dir());
+        assert!(OsPath::from("/").absolute());
+        assert!(OsPath::from("/").join("foo.txt").is_file());
+        assert!(OsPath::from("/").join("foo.txt").absolute());
+        // assert_eq!(
+        //     OsPath::from("/").join("foo.txt").parent(),
+        //     Some(OsPath::from("/"))
+        // );
+        // assert_eq!(
+        //     OsPath::from("/").join("foo.txt").name(),
+        //     Some(&"foo.txt".to_string())
+        // );
+
+        // assert_eq!(OsPath::from("./foo.txt").to_string(), "./foo.txt");
+    }
+}
