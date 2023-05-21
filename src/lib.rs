@@ -362,7 +362,7 @@ impl OsPath {
         if second.components.len() == 0 {
             return;
         }
-        if first.components.len() == 0 {
+        if first.components.len() == 0 && !first.absolute {
             *first = second;
             return;
         }
