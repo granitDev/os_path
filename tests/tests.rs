@@ -12,18 +12,18 @@ fn test_impossible_path() {
 fn test_absolute_path_resolution() {
     #[cfg(unix)]
     {
-        assert!(OsPath::from("/foo").absolute());
-        assert!(OsPath::from("/foo/").absolute());
-        assert!(!OsPath::from("foo/").absolute());
-        assert!(!OsPath::from("foo/bar/").absolute());
+        assert!(OsPath::from("/foo").is_absolute());
+        assert!(OsPath::from("/foo/").is_absolute());
+        assert!(!OsPath::from("foo/").is_absolute());
+        assert!(!OsPath::from("foo/bar/").is_absolute());
     }
     #[cfg(windows)]
     {
-        assert!(OsPath::from("C:\\foo").absolute());
-        assert!(OsPath::from("C:\\foo\\").absolute());
-        assert!(!OsPath::from("foo\\").absolute());
-        assert!(!OsPath::from("foo\\bar\\").absolute());
-        assert!(!OsPath::from("\\foo\\bar\\").absolute());
+        assert!(OsPath::from("C:\\foo").is_absolute());
+        assert!(OsPath::from("C:\\foo\\").is_absolute());
+        assert!(!OsPath::from("foo\\").is_absolute());
+        assert!(!OsPath::from("foo\\bar\\").is_absolute());
+        assert!(!OsPath::from("\\foo\\bar\\").is_absolute());
     }
 }
 
@@ -155,13 +155,36 @@ fn test_parent() {
 }
 
 #[test]
+fn test_froms() {
+    #[cfg(unix)]
+    {
+        let path_buf = std::path::PathBuf::from("/foo/bar/baz.txt");
+        assert_eq!(OsPath::from(&path_buf), OsPath::from("/foo/bar/baz.txt"));
+        assert_eq!(OsPath::from(path_buf), OsPath::from("/foo/bar/baz.txt"));
+    }
+
+    #[cfg(windows)]
+    {
+        let path_buf = std::path::PathBuf::from("C:\\foo\\bar\\baz.txt");
+        assert_eq!(
+            OsPath::from(&path_buf),
+            OsPath::from("C:\\foo\\bar\\baz.txt")
+        );
+        assert_eq!(
+            OsPath::from(path_buf),
+            OsPath::from("C:\\foo\\bar\\baz.txt")
+        );
+    }
+}
+
+#[test]
 fn test_some_edge_cases() {
     #[cfg(unix)]
     {
         assert!(OsPath::from("/").is_dir());
-        assert!(OsPath::from("/").absolute());
+        assert!(OsPath::from("/").is_absolute());
         assert!(OsPath::from("/").join("foo.txt").is_file());
-        assert!(OsPath::from("/").join("foo.txt").absolute());
+        assert!(OsPath::from("/").join("foo.txt").is_absolute());
         assert_eq!(
             OsPath::from("/").join("foo.txt").parent(),
             Some(OsPath::from("/"))

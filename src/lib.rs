@@ -41,7 +41,7 @@
 //! assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
 //! ```
 //!
-//! //! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
+//! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
 //! `/foo/bar` and we push() /baz.txt to it. With the standard libraries Path and PathBuf, you'll end up with `/baz.txt`
 //! as your path. This is very counter intuitive, and requires extra code be written to strip the leading slash in order
 //! to prevent this.
@@ -205,12 +205,12 @@ impl OsPath {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("/absolute/path/");
-    /// assert!(os_path.absolute());
+    /// assert!(os_path.is_absolute());
     ///
     /// let os_path = OsPath::from("not/absolute/path/");
-    /// assert!(!os_path.absolute());
+    /// assert!(!os_path.is_absolute());
     /// ```
-    pub fn absolute(&self) -> bool {
+    pub fn is_absolute(&self) -> bool {
         self.absolute
     }
 
@@ -255,7 +255,7 @@ impl OsPath {
     /// assert_eq!(os_path.name().unwrap().to_string(), "lib.rs");
     /// ```
     pub fn name(&self) -> Option<&String> {
-        if self.components.len() > 0 {
+        if !self.components.is_empty() {
             return self.components.last();
         }
         None
@@ -296,6 +296,13 @@ impl OsPath {
 }
 
 impl OsPath {
+    /// Returns the path as a String.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/foo/bar/baz.txt");
+    /// assert_eq!(os_path.to_string(), "/foo/bar/baz.txt");
+    /// ```
     pub fn to_string(&self) -> String {
         match (self.absolute, self.directory) {
             (true, true) => ROOT.to_string() + &self.components.join(SLASH_STR) + SLASH_STR,
@@ -305,11 +312,25 @@ impl OsPath {
         }
     }
 
+    /// Returns the path as a PathBuf.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/foo/bar/baz.txt");
+    /// assert_eq!(os_path.to_pathbuf(), std::path::PathBuf::from("/foo/bar/baz.txt"));
+    /// ```
     pub fn to_pathbuf(&self) -> PathBuf {
         let path = self.to_path();
         path.to_owned()
     }
 
+    /// Returns the path as a Path.
+    /// ```rust
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/foo/bar/baz.txt");
+    /// assert_eq!(os_path.to_path(), std::path::Path::new("/foo/bar/baz.txt"));
+    /// ```
     pub fn to_path(&self) -> &Path {
         self.path.as_path()
     }
@@ -319,11 +340,7 @@ impl OsPath {
     fn build_self<P: AsRef<Path>>(path: P) -> Self {
         let path = path.as_ref().to_string_lossy().to_string();
         let absolute = path.starts_with(ROOT) || path.starts_with(BS) || path.starts_with(FS);
-        let directory = if path.ends_with(SLASH) || path.ends_with(UP) {
-            true
-        } else {
-            false
-        };
+        let directory = path.ends_with(SLASH) || path.ends_with(UP);
         let clean: String = path
             .chars()
             .map(|c| if c == BS || c == FS { RC } else { c })
@@ -359,10 +376,10 @@ impl OsPath {
     }
 
     fn merge_paths(first: &mut Self, mut second: Self) {
-        if second.components.len() == 0 {
+        if second.components.is_empty() {
             return;
         }
-        if first.components.len() == 0 && !first.absolute {
+        if first.components.is_empty() && !first.absolute {
             *first = second;
             return;
         }
@@ -396,13 +413,19 @@ impl From<&str> for OsPath {
 
 impl From<String> for OsPath {
     fn from(s: String) -> Self {
-        Self::build_self(&s)
+        Self::build_self(s)
     }
 }
 
 impl From<PathBuf> for OsPath {
     fn from(p: PathBuf) -> Self {
-        Self::build_self(&p)
+        Self::build_self(p)
+    }
+}
+
+impl From<&PathBuf> for OsPath {
+    fn from(p: &PathBuf) -> Self {
+        Self::build_self(p)
     }
 }
 
