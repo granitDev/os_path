@@ -407,9 +407,20 @@ impl OsPath {
     fn build_pathbuf(components: &Vec<String>, absolute: bool) -> PathBuf {
         let mut path = PathBuf::new();
         if absolute {
+            #[cfg(unix)]
             path.push(ROOT);
+            #[cfg(windows)]
+            if components.len() == 1 {
+                path.push(format!("{}{}", &components[0], SLASH_STR));
+                return path; // !!! EARLY RETURN !!!
+            }
         }
         for c in components {
+            #[cfg(windows)]
+            if c == "C:" {
+                path.push(format!("{}{}", &c, SLASH_STR));
+                continue;
+            }
             path.push(c);
         }
         path
@@ -577,25 +588,26 @@ mod tests {
             assert_eq!(path.components.len(), 1);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, true);
-            // assert_eq!(path.path, PathBuf::from("C:\\"));
+            assert_eq!(path.path, PathBuf::from("C:\\"));
 
             let path = OsPath::build_self("C:\\a\\b\\c");
+            print!("{:?}", path);
             assert_eq!(path.components.len(), 4);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
-            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c"));
+            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c"));
 
             let path = OsPath::build_self("C:\\a\\b\\c\\");
             assert_eq!(path.components.len(), 4);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, true);
-            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\"));
+            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\"));
 
             let path = OsPath::build_self("C:\\a\\b\\c\\..\\..\\..\\d");
             assert_eq!(path.components.len(), 8);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
-            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
+            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
         }
     }
 }
