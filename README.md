@@ -40,12 +40,8 @@ It can be passed into any function that takes <P: AsRef<Path>>(path: P) as an ar
 MIT License
 
 ## Project status
-Very stable on Unix systems. Documentation is mostly complete.
+Very stable. Documentation is mostly complete.
 
 I'm adding implementations as needs arise.
-
-I'm aware that there is some odd behavior with Windows path handling, sometimes you get a "C:C:\\" prefix.
-
-I'm working on a fix, as currently OsPath will not pass all the Windows specific unit tests. When that happens, I'll move to version 1.0.0
 
 
