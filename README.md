@@ -40,8 +40,12 @@ It can be passed into any function that takes <P: AsRef<Path>>(path: P) as an ar
 MIT License
 
 ## Project status
-Decently stable, but still in development. Documentation is still in the works, I'm adding to it regularly right now.
+Very stable on Unix systems. Documentation is mostly complete.
 
-It's unlikely that the API will break, as I'm adding items to it, not removing or renaming as the existing API matches very closely with std::path::Path/PathBuf.
+I'm adding implementations as needs arise.
 
-There are a decent amount of unit tests applied, but I'm sure there are still some unhandled edge cases - that said, my goal was to make a friendlier and more powerful version of PathBuf, thus, any as-of-yet unhandled edge cases are likely to behave similarly to PathBuf.
+I'm aware that there is some odd behavior with Windows path handling, sometimes you get a "C:C:\\" prefix.
+
+I'm working on a fix, as currently OsPath will not pass all the Windows specific unit tests. When that happens, I'll move to version 1.0.0
+
+
