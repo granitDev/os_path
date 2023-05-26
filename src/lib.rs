@@ -105,9 +105,10 @@
 //! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
 //!
 
-use serde::{Deserialize, Serialize};
+use serde::{Serialize, Serializer};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::fmt;
 
 #[cfg(unix)]
 mod localization {
@@ -131,7 +132,7 @@ const FS: char = '/';
 const UP: &str = "..";
 
 /// An intelligent path type that can be used in place of `std::path::PathBuf`.
-#[derive(Clone, PartialEq, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Default)]
 pub struct OsPath {
     components: Vec<String>,
     absolute: bool,
@@ -296,14 +297,7 @@ impl OsPath {
 }
 
 impl OsPath {
-    /// Returns the path as a String.
-    /// ```rust
-    /// use os_path::OsPath;
-    ///
-    /// let os_path = OsPath::from("/foo/bar/baz.txt");
-    /// assert_eq!(os_path.to_string(), "/foo/bar/baz.txt");
-    /// ```
-    pub fn to_string(&self) -> String {
+    fn build_string(&self) -> String {
         match (self.absolute, self.directory) {
             (true, true) => ROOT.to_string() + &self.components.join(SLASH_STR) + SLASH_STR,
             (true, false) => ROOT.to_string() + &self.components.join(SLASH_STR),
@@ -396,6 +390,21 @@ impl OsPath {
             first.components.push(c);
         }
         first.directory = second.directory;
+    }
+}
+
+impl fmt::Display for OsPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build_string())
+    }
+}
+
+impl Serialize for OsPath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.build_string())
     }
 }
 
