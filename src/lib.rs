@@ -105,10 +105,11 @@
 //! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
 //!
 
-use serde::{Serialize, Serializer};
+use serde::de::{self, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
 use std::fmt;
+use std::path::{Path, PathBuf};
 
 #[cfg(unix)]
 mod localization {
@@ -405,6 +406,32 @@ impl Serialize for OsPath {
         S: Serializer,
     {
         serializer.serialize_str(&self.build_string())
+    }
+}
+
+struct OsPathVisitor;
+
+impl<'de> Visitor<'de> for OsPathVisitor {
+    type Value = OsPath;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a str or String")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(OsPath::from(value))
+    }
+}
+
+impl<'de> Deserialize<'de> for OsPath {
+    fn deserialize<D>(deserializer: D) -> Result<OsPath, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_str(OsPathVisitor)
     }
 }
 

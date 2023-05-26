@@ -1,4 +1,6 @@
 use os_path::OsPath;
+// use serde::{Deserialize, Serialize};
+// use serde_json;
 
 #[test]
 fn test_impossible_path() {
@@ -7,6 +9,21 @@ fn test_impossible_path() {
         OsPath::from("/foo/bar/baz.txt")
     )
 }
+
+// #[test]
+// fn serde_test() {
+//     #[derive(Deserialize, Serialize)]
+//     struct MyS {
+//         pub p: OsPath,
+//     }
+//     let data = r#"
+//     {
+//         "p": "/some/long/path/foo.txt"
+//     }
+//     "#;
+//     let p: MyS = serde_json::from_str(data).unwrap();
+//     assert!(p.p.to_string() == "/some/long/path/foo.txt");
+// }
 
 #[test]
 fn test_absolute_path_resolution() {
