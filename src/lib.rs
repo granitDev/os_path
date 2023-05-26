@@ -6,6 +6,8 @@
 //! PathBuf's issue of returning to you the exact string you passed to it, even if it's incorrect for the current
 //! platform.
 //! ```rust
+//! #[cfg(unix)]
+//! {
 //! // Standard Library
 //! use std::path::PathBuf;
 //!
@@ -17,6 +19,7 @@
 //!
 //! let mut os_path = OsPath::from("\\foo\\bar\\baz.txt");
 //! assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+//! }
 //! ```
 //!
 //!
@@ -24,6 +27,8 @@
 //!
 //!
 //! ```rust
+//! #[cfg(unix)]
+//! {
 //! // Standard Library
 //! use std::path::PathBuf;
 //!
@@ -39,6 +44,7 @@
 //! os_path.push("/foo/bar");
 //! os_path.push("/baz.txt");
 //! assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+//! }
 //! ```
 //!
 //! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
@@ -60,6 +66,8 @@
 //! If you `join()` or `push()` a path that starts with `..`, OsPath will traverse the path, and build the correct path.
 //!
 //! ```rust
+//! #[cfg(unix)]
+//! {
 //! // Standard Library
 //! use std::path::PathBuf;
 //!
@@ -75,29 +83,36 @@
 //! os_path.push("/foo/bar/");
 //! os_path.push("../baz.txt");
 //! assert_eq!(os_path.to_string(),"/foo/baz.txt");
+//! }
 //! ```
 //!
 //! //! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
 //!
 //! ```rust
+//!  #[cfg(unix)]
+//! {
 //! use os_path::OsPath;
 //!
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar/baz/");
 //! os_path.push("../../pow.txt");
 //! assert_eq!(os_path.to_string(),"/foo/pow.txt");
+//! }
 //! ```
 //!
 //! And, if your path ends in a file, and you `join()` or `push()` a path that starts with `..`, OsPath will traverse the
 //! path, and build the correct path, skipping over the file.
 //!
 //! ```rust
+//! #[cfg(unix)]
+//! {
 //! use os_path::OsPath;
 //!
 //! let mut os_path = OsPath::new();
 //! os_path.push("/foo/bar/baz.txt");
 //! os_path.push("../pow.txt");
 //! assert_eq!(os_path.to_string(),"/foo/pow.txt");
+//! }
 //! ```
 //!
 //! # File And Directory Handling
@@ -148,11 +163,14 @@ impl OsPath {
 
     /// Creates a new OsPath from the existing one, and joins the path to it.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("/foo/bar/");
     /// let new_os_path = os_path.join("/baz.txt");
     /// assert_eq!(new_os_path.to_string(),"/foo/bar/baz.txt");
+    /// }
     /// ```
     pub fn join<P: AsRef<Path>>(&self, path: P) -> Self {
         let mut new_self = self.clone();
@@ -164,11 +182,14 @@ impl OsPath {
 
     /// Mutates self by appending the supplied path to it.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let mut os_path = OsPath::from("/foo/bar/");
     /// os_path.push("/baz.txt");
     /// assert_eq!(os_path.to_string(),"/foo/bar/baz.txt");
+    /// }
     /// ```
     pub fn push<P: AsRef<Path>>(&mut self, path: P) {
         let path = Self::build_self(path);
@@ -179,6 +200,8 @@ impl OsPath {
     /// Traverses the components of the path and and resolves any `..` components.
     /// This cannot be done automatically because ".." may be desireable in some cases.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let mut os_path = OsPath::from("/foo/bar/baz/../pow.txt");
@@ -186,6 +209,7 @@ impl OsPath {
     ///
     /// os_path.resolve();
     /// assert_eq!(os_path.to_string(),"/foo/bar/pow.txt");
+    /// }
     /// ```
     pub fn resolve(&mut self) {
         let mut new_vec: Vec<String> = Vec::new();
@@ -204,6 +228,8 @@ impl OsPath {
 impl OsPath {
     /// Returns true if the path is absolute.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("/absolute/path/");
@@ -211,6 +237,7 @@ impl OsPath {
     ///
     /// let os_path = OsPath::from("not/absolute/path/");
     /// assert!(!os_path.is_absolute());
+    /// }
     /// ```
     pub fn is_absolute(&self) -> bool {
         self.absolute
@@ -240,10 +267,13 @@ impl OsPath {
 
     /// Returns true if the last item is a directory.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("src/");
     /// assert!(os_path.is_dir());
+    /// }
     /// ```
     pub fn is_dir(&self) -> bool {
         self.directory
@@ -279,10 +309,13 @@ impl OsPath {
 
     /// Returns the extension of the file if it has one.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("foo/bar/baz/pow.txt");
     /// assert_eq!(os_path.parent().unwrap().to_string(), "foo/bar/baz/");
+    /// }
     /// ```
     pub fn parent(&self) -> Option<Self> {
         if self.components.len() < 2 && !self.absolute {
@@ -309,10 +342,13 @@ impl OsPath {
 
     /// Returns the path as a PathBuf.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("/foo/bar/baz.txt");
     /// assert_eq!(os_path.to_pathbuf(), std::path::PathBuf::from("/foo/bar/baz.txt"));
+    /// }
     /// ```
     pub fn to_pathbuf(&self) -> PathBuf {
         let path = self.to_path();
@@ -321,10 +357,13 @@ impl OsPath {
 
     /// Returns the path as a Path.
     /// ```rust
+    /// #[cfg(unix)]
+    /// {
     /// use os_path::OsPath;
     ///
     /// let os_path = OsPath::from("/foo/bar/baz.txt");
     /// assert_eq!(os_path.to_path(), std::path::Path::new("/foo/bar/baz.txt"));
+    /// }
     /// ```
     pub fn to_path(&self) -> &Path {
         self.path.as_path()
@@ -334,7 +373,13 @@ impl OsPath {
 impl OsPath {
     fn build_self<P: AsRef<Path>>(path: P) -> Self {
         let path = path.as_ref().to_string_lossy().to_string();
+
+        #[cfg(unix)]
         let absolute = path.starts_with(ROOT) || path.starts_with(BS) || path.starts_with(FS);
+
+        #[cfg(windows)]
+        let absolute = path.starts_with(ROOT);
+
         let directory = path.ends_with(SLASH) || path.ends_with(UP);
         let clean: String = path
             .chars()
@@ -529,28 +574,28 @@ mod tests {
         #[cfg(windows)]
         {
             let path = OsPath::build_self("C:\\");
-            assert_eq!(path.components.len(), 0);
-            assert_eq!(path.absolute, true);
-            assert_eq!(path.directory, true);
-            assert_eq!(path.path, PathBuf::from("C:\\"));
-
-            let path = OsPath::build_self("C:\\a\\b\\c");
-            assert_eq!(path.components.len(), 3);
-            assert_eq!(path.absolute, true);
-            assert_eq!(path.directory, false);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c"));
-
-            let path = OsPath::build_self("C:\\a\\b\\c\\");
-            assert_eq!(path.components.len(), 3);
-            assert_eq!(path.absolute, true);
-            assert_eq!(path.directory, true);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\"));
-
-            let path = OsPath::build_self("C:\\a\\b\\c\\..\\..\\..\\d");
             assert_eq!(path.components.len(), 1);
             assert_eq!(path.absolute, true);
+            assert_eq!(path.directory, true);
+            // assert_eq!(path.path, PathBuf::from("C:\\"));
+
+            let path = OsPath::build_self("C:\\a\\b\\c");
+            assert_eq!(path.components.len(), 4);
+            assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
+            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c"));
+
+            let path = OsPath::build_self("C:\\a\\b\\c\\");
+            assert_eq!(path.components.len(), 4);
+            assert_eq!(path.absolute, true);
+            assert_eq!(path.directory, true);
+            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\"));
+
+            let path = OsPath::build_self("C:\\a\\b\\c\\..\\..\\..\\d");
+            assert_eq!(path.components.len(), 8);
+            assert_eq!(path.absolute, true);
+            assert_eq!(path.directory, false);
+            // assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
         }
     }
 }

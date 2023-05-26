@@ -55,8 +55,8 @@ fn test_directory_resolution() {
     #[cfg(windows)]
     {
         assert!(OsPath::from("C:\\foo\\").is_dir());
-        assert!(OsPath::from("C:\\foo").is_file);
-        assert!(OsPath::from("C:\\foo\\bar.txt").is_file);
+        assert!(OsPath::from("C:\\foo").is_file());
+        assert!(OsPath::from("C:\\foo\\bar.txt").is_file());
     }
 }
 
