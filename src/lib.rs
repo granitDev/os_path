@@ -156,6 +156,7 @@ pub struct OsPath {
     path: PathBuf,
 }
 
+/// Public Methods
 impl OsPath {
     pub fn new() -> Self {
         Self::default()
@@ -223,9 +224,7 @@ impl OsPath {
         self.components = new_vec;
         self.path = Self::build_pathbuf(&self.components, self.absolute);
     }
-}
 
-impl OsPath {
     /// Returns true if the path is absolute.
     /// ```rust
     /// #[cfg(unix)]
@@ -328,16 +327,19 @@ impl OsPath {
         new_self.directory = true;
         Some(new_self)
     }
-}
 
-impl OsPath {
-    fn build_string(&self) -> String {
-        match (self.absolute, self.directory) {
-            (true, true) => ROOT.to_string() + &self.components.join(SLASH_STR) + SLASH_STR,
-            (true, false) => ROOT.to_string() + &self.components.join(SLASH_STR),
-            (false, false) => self.components.join(SLASH_STR),
-            (false, true) => self.components.join(SLASH_STR) + SLASH_STR,
-        }
+    /// Forces path to be a directory to provide desired behavior if a path is missing the trailing slash.
+    /// ```rust
+    /// {
+    /// use os_path::OsPath;
+    ///
+    /// let mut os_path = OsPath::from("foo/bar/baz/pow");
+    /// assert!(!os_path.is_dir());
+    /// os_path.force_dir();
+    /// assert!(os_path.is_dir());
+    /// }
+    pub fn force_dir(&mut self) {
+        self.directory = true;
     }
 
     /// Returns the path as a PathBuf.
@@ -370,6 +372,7 @@ impl OsPath {
     }
 }
 
+/// Private Methods
 impl OsPath {
     fn build_self<P: AsRef<Path>>(path: P) -> Self {
         let path = path.as_ref().to_string_lossy().to_string();
@@ -401,6 +404,23 @@ impl OsPath {
             absolute,
             directory,
             path,
+        }
+    }
+
+    fn build_string(&self) -> String {
+        match (self.absolute, self.directory) {
+            #[cfg(unix)]
+            (true, true) => ROOT.to_string() + &self.components.join(SLASH_STR) + SLASH_STR,
+            #[cfg(unix)]
+            (true, false) => ROOT.to_string() + &self.components.join(SLASH_STR),
+
+            #[cfg(windows)]
+            (true, true) => self.components.join(SLASH_STR) + SLASH_STR,
+            #[cfg(windows)]
+            (true, false) => self.components.join(SLASH_STR),
+
+            (false, false) => self.components.join(SLASH_STR),
+            (false, true) => self.components.join(SLASH_STR) + SLASH_STR,
         }
     }
 

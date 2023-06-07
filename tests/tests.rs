@@ -182,6 +182,9 @@ fn test_froms() {
 
     #[cfg(windows)]
     {
+        let path = OsPath::from("C:\\foo\\bar\\baz.txt");
+        println!("Test path: {:?}", path);
+
         let path_buf = std::path::PathBuf::from("C:\\foo\\bar\\baz.txt");
         assert_eq!(
             OsPath::from(&path_buf),
@@ -190,6 +193,10 @@ fn test_froms() {
         assert_eq!(
             OsPath::from(path_buf),
             OsPath::from("C:\\foo\\bar\\baz.txt")
+        );
+        assert_eq!(
+            OsPath::from("C:\\foo\\bar\\baz.txt").to_string(),
+            "C:\\foo\\bar\\baz.txt".to_string()
         );
     }
 }
