@@ -10,21 +10,6 @@ fn test_impossible_path() {
     )
 }
 
-// #[test]
-// fn serde_test() {
-//     #[derive(Deserialize, Serialize)]
-//     struct MyS {
-//         pub p: OsPath,
-//     }
-//     let data = r#"
-//     {
-//         "p": "/some/long/path/foo.txt"
-//     }
-//     "#;
-//     let p: MyS = serde_json::from_str(data).unwrap();
-//     assert!(p.p.to_string() == "/some/long/path/foo.txt");
-// }
-
 #[test]
 fn test_absolute_path_resolution() {
     #[cfg(unix)]

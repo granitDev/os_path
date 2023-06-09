@@ -529,6 +529,12 @@ impl From<String> for OsPath {
     }
 }
 
+impl From<&String> for OsPath {
+    fn from(s: &String) -> Self {
+        Self::build_self(s)
+    }
+}
+
 impl From<PathBuf> for OsPath {
     fn from(p: PathBuf) -> Self {
         Self::build_self(p)
@@ -538,6 +544,26 @@ impl From<PathBuf> for OsPath {
 impl From<&PathBuf> for OsPath {
     fn from(p: &PathBuf) -> Self {
         Self::build_self(p)
+    }
+}
+
+impl FromIterator<OsPath> for OsPath {
+    fn from_iter<I: IntoIterator<Item = OsPath>>(iter: I) -> Self {
+        let mut path = Self::new();
+        for i in iter {
+            path.push(i);
+        }
+        path
+    }
+}
+
+impl FromIterator<String> for OsPath {
+    fn from_iter<I: IntoIterator<Item = String>>(iter: I) -> Self {
+        let mut path = Self::new();
+        for i in iter {
+            path.push(i);
+        }
+        path
     }
 }
 
