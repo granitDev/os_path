@@ -48,11 +48,11 @@
 //! ```
 //!
 //! False root errors occur when you you attempt to join paths with leading slashes. In the above example we have
-//! `/foo/bar` and we push() /baz.txt to it. With the standard libraries Path and PathBuf, you'll end up with `/baz.txt`
+//! `/foo/bar` and we push() `/baz.txt` to it. With the standard libraries Path and PathBuf, you'll end up with `/baz.txt`
 //! as your path. This is very counter intuitive, and requires extra code be written to strip the leading slash in order
 //! to prevent this.
 //!
-//! Instead, OsPath will do what you expect, and return /foo/bar/baz.txt.
+//! Instead, OsPath will do what you expect, and return `/foo/bar/baz.txt`.
 //!
 //! And OsPath does this while still assuming at the start that both paths were absolute. If you queried either path
 //! beforehand, they would both return true for `is_absolute()`. However, when you joined the two paths, OsPath correctly
