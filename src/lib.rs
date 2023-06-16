@@ -61,7 +61,7 @@
 //! > Note that this is not a problem on Windows, as attempting to join any path starting with `C:\` is nonsensical,
 //! > while joinging a path prefixed with `/` or `\\` is not.
 //!
-//! //! # Path Resolution and Traversal
+//! # Path Resolution and Traversal
 //!
 //! If you `join()` or `push()` a path that starts with `..`, OsPath will traverse the path, and build the correct path.
 //!
@@ -86,7 +86,7 @@
 //! }
 //! ```
 //!
-//! //! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
+//! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
 //!
 //! ```rust
 //!  #[cfg(unix)]
