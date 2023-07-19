@@ -306,7 +306,7 @@ impl OsPath {
         None
     }
 
-    /// Returns the extension of the file if it has one.
+    /// Returns the path of the parent directory, if it has one.
     /// ```rust
     /// #[cfg(unix)]
     /// {
@@ -326,6 +326,22 @@ impl OsPath {
         new_self.path = Self::build_pathbuf(&new_self.components, new_self.absolute);
         new_self.directory = true;
         Some(new_self)
+    }
+
+    /// Returns the root element of the path, if it has one.
+    /// ```rust
+    /// {
+    /// use os_path::OsPath;
+    ///
+    /// let os_path = OsPath::from("/foo/bar/baz.txt");
+    /// assert_eq!("foo".to_string(), os_path.root().unwrap());
+    /// }
+    /// ```
+    pub fn root(&self) -> Option<String> {
+        if self.components.len() > 1 {
+            return Some(self.components[0].clone());
+        }
+        None
     }
 
     /// Forces path to be a directory to provide desired behavior if a path is missing the trailing slash.
