@@ -89,7 +89,7 @@
 //! OsPath can handle multiple `..` in a row, and will traverse the path correctly.
 //!
 //! ```rust
-//!  #[cfg(unix)]
+//! #[cfg(unix)]
 //! {
 //! use os_path::OsPath;
 //!
@@ -338,7 +338,7 @@ impl OsPath {
     /// }
     /// ```
     pub fn root(&self) -> Option<String> {
-        if self.components.len() > 1 {
+        if self.components.len() > 0 {
             return Some(self.components[0].clone());
         }
         None
@@ -583,6 +583,12 @@ impl FromIterator<String> for OsPath {
     }
 }
 
+impl AsRef<OsPath> for OsPath {
+    fn as_ref(&self) -> &OsPath {
+        self
+    }
+}
+
 impl AsRef<Path> for OsPath {
     fn as_ref(&self) -> &Path {
         self.to_path()
@@ -670,6 +676,10 @@ mod tests {
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
             assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
+            assert_eq!(path.root().unwrap(), "C:".to_string());
+
+            let path = OsPath::build_self("D:\\");
+            assert_eq!(path.root().unwrap(), "D:".to_string());
         }
     }
 }

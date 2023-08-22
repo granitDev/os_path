@@ -1,6 +1,6 @@
 [package]
 name = "os_path"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2021"
 description = "Intelligent path handling with std lib interoperability"
 documentation = "https://docs.rs/os_path"
@@ -12,4 +12,3 @@ keywords = ["path", "paths", "os", "pathbuf"]
 
 [dependencies]
 serde = { version = "1.0.163", features = ["derive"] }
-# serde_json = "1.0.96"
