@@ -338,7 +338,7 @@ impl OsPath {
     /// }
     /// ```
     pub fn root(&self) -> Option<String> {
-        if self.components.len() > 0 {
+        if !self.components.is_empty() {
             return Some(self.components[0].clone());
         }
         None
