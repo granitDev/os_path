@@ -369,8 +369,7 @@ impl OsPath {
     /// }
     /// ```
     pub fn to_pathbuf(&self) -> PathBuf {
-        let path = self.to_path();
-        path.to_owned()
+        self.path.clone()
     }
 
     /// Returns the path as a Path.
@@ -545,6 +544,18 @@ impl From<String> for OsPath {
     }
 }
 
+impl From<OsPath> for String {
+    fn from(p: OsPath) -> Self {
+        p.build_string()
+    }
+}
+
+impl From<&OsPath> for String {
+    fn from(p: &OsPath) -> Self {
+        p.build_string()
+    }
+}
+
 impl From<&String> for OsPath {
     fn from(s: &String) -> Self {
         Self::build_self(s)
@@ -557,8 +568,20 @@ impl From<PathBuf> for OsPath {
     }
 }
 
+impl From<OsPath> for PathBuf {
+    fn from(p: OsPath) -> Self {
+        p.path
+    }
+}
+
 impl From<&PathBuf> for OsPath {
     fn from(p: &PathBuf) -> Self {
+        Self::build_self(p)
+    }
+}
+
+impl From<&Path> for OsPath {
+    fn from(p: &Path) -> Self {
         Self::build_self(p)
     }
 }
@@ -591,13 +614,13 @@ impl AsRef<OsPath> for OsPath {
 
 impl AsRef<Path> for OsPath {
     fn as_ref(&self) -> &Path {
-        self.to_path()
+        &self.path
     }
 }
 
 impl AsRef<OsStr> for OsPath {
     fn as_ref(&self) -> &OsStr {
-        self.to_path().as_os_str()
+        self.path.as_os_str()
     }
 }
 
