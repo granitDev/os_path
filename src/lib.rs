@@ -120,6 +120,7 @@
 //! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
 //!
 
+#[cfg(windows)]
 use regex::Regex;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
