@@ -401,8 +401,10 @@ impl OsPath {
         let absolute = path.starts_with(ROOT) || path.starts_with(BS) || path.starts_with(FS);
 
         #[cfg(windows)]
-        let re = Regex::new(r"^[a-zA-Z]:").unwrap();
-        let absolute = re.is_match(&path);
+        let absolute = match Regex::new(r"^[a-zA-Z]:") {
+            Ok(re) => re.is_match(&path),
+            Err(_) => false,
+        };
 
         let directory = path.ends_with(SLASH) || path.ends_with(UP);
         let clean: String = path
@@ -456,15 +458,27 @@ impl OsPath {
                 return path; // !!! EARLY RETURN !!!
             }
         }
-        let re = Regex::new(r"^[a-zA-Z]:$").unwrap();
-        for c in components {
-            #[cfg(windows)]
-            if re.is_match(&c) {
-                path.push(format!("{}{}", &c, SLASH_STR));
-                continue;
+        #[cfg(windows)]
+        if let Ok(re) = Regex::new(r"^[a-zA-Z]:$") {
+            for c in components {
+                #[cfg(windows)]
+                if re.is_match(&c) {
+                    path.push(format!("{}{}", &c, SLASH_STR));
+                    continue;
+                }
+                path.push(c);
             }
+        } else {
+            for c in components {
+                path.push(c);
+            }
+        }
+
+        #[cfg(unix)]
+        for c in components {
             path.push(c);
         }
+
         path
     }
 
