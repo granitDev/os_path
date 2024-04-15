@@ -681,28 +681,25 @@ mod tests {
             assert_eq!(path.directory, true);
             assert_eq!(path.path, PathBuf::from("C:\\"));
 
-            let path = OsPath::build_self("C:\\a\\b\\c");
+            let path = OsPath::build_self("A:\\a\\b\\c");
             print!("{:?}", path);
             assert_eq!(path.components.len(), 4);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c"));
+            assert_eq!(path.path, PathBuf::from("A:\\a\\b\\c"));
 
-            let path = OsPath::build_self("C:\\a\\b\\c\\");
+            let path = OsPath::build_self("D:\\a\\b\\c\\");
             assert_eq!(path.components.len(), 4);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, true);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\"));
+            assert_eq!(path.path, PathBuf::from("D:\\a\\b\\c\\"));
 
-            let path = OsPath::build_self("C:\\a\\b\\c\\..\\..\\..\\d");
+            let path = OsPath::build_self("O:\\a\\b\\c\\..\\..\\..\\d");
             assert_eq!(path.components.len(), 8);
             assert_eq!(path.absolute, true);
             assert_eq!(path.directory, false);
-            assert_eq!(path.path, PathBuf::from("C:\\a\\b\\c\\..\\..\\..\\d"));
-            assert_eq!(path.root().unwrap(), "C:".to_string());
-
-            let path = OsPath::build_self("D:\\");
-            assert_eq!(path.root().unwrap(), "D:".to_string());
+            assert_eq!(path.path, PathBuf::from("O:\\a\\b\\c\\..\\..\\..\\d"));
+            assert_eq!(path.root().unwrap(), "O:".to_string());
         }
     }
 }
