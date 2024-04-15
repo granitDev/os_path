@@ -1,6 +1,6 @@
 [package]
 name = "os_path"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 description = "Intelligent path handling with std lib interoperability"
 documentation = "https://docs.rs/os_path"
@@ -11,4 +11,5 @@ keywords = ["path", "paths", "os", "pathbuf"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+regex = "1.10.4"
 serde = { version = "1.0", features = ["derive"] }

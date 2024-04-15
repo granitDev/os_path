@@ -120,6 +120,7 @@
 //! If the path ends in a `/` or `\\` OsPath assumes this is a directory, otherwise it's a file.
 //!
 
+use regex::Regex;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::ffi::OsStr;
@@ -135,12 +136,16 @@ mod localization {
 
 #[cfg(windows)]
 mod localization {
-    pub const ROOT: &str = "C:\\";
+    // pub const ROOT: &str = "C:\\";
     pub const SLASH: char = '\\';
     pub const SLASH_STR: &str = "\\";
 }
 
+#[cfg(unix)]
 use localization::{ROOT, SLASH, SLASH_STR};
+
+#[cfg(windows)]
+use localization::{SLASH, SLASH_STR};
 
 const RC: char = char::REPLACEMENT_CHARACTER; // '�'
 const BS: char = '\\';
@@ -396,7 +401,8 @@ impl OsPath {
         let absolute = path.starts_with(ROOT) || path.starts_with(BS) || path.starts_with(FS);
 
         #[cfg(windows)]
-        let absolute = path.starts_with(ROOT);
+        let re = Regex::new(r"^[a-zA-Z]:").unwrap();
+        let absolute = re.is_match(&path);
 
         let directory = path.ends_with(SLASH) || path.ends_with(UP);
         let clean: String = path
@@ -450,9 +456,10 @@ impl OsPath {
                 return path; // !!! EARLY RETURN !!!
             }
         }
+        let re = Regex::new(r"^[a-zA-Z]:$").unwrap();
         for c in components {
             #[cfg(windows)]
-            if c == "C:" {
+            if re.is_match(&c) {
                 path.push(format!("{}{}", &c, SLASH_STR));
                 continue;
             }
